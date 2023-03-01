@@ -15,8 +15,25 @@ async function getShowsByTerm(term) {
   // ADD: Remove placeholder & make request to TVMaze search shows API.
   // return same format of data, just must be looped to ensure we are
   // appending every relevant show to the search term.
+  console.log('shows by term ran');
+  const showResponse = await axios.get(
+    `${API_TV_MAZE_URL}search/shows`,
+    {params : {q : term}}
+  );
+  console.log('i got some shows', showResponse);
 
-  const showInfo = await axios.get(`${API_TV_MAZE_URL}search/shows?q=${term}`);
+  const showData = showResponse.data.map(show => {
+    return {
+    id: show.show.id,
+    name: show.show.name,
+    summary: show.show.summary,
+    image: show.show.image //NOTE: may not have image;
+
+    }
+  });
+
+  console.log(showData);
+
 
   // return [
   //   {
@@ -46,9 +63,9 @@ function populateShows(shows) {
     const $show = $(
       `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
-           <img 
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg" 
-              alt="Bletchly Circle San Francisco" 
+           <img
+              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg"
+              alt="Bletchly Circle San Francisco"
               class="w-25 me-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
@@ -57,7 +74,7 @@ function populateShows(shows) {
                Episodes
              </button>
            </div>
-         </div>  
+         </div>
        </div>
       `
     );
