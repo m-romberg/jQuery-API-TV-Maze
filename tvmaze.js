@@ -3,7 +3,10 @@
 const $showsList = $("#showsList");
 const $episodesArea = $("#episodesArea");
 const $searchForm = $("#searchForm");
+const $episodesList = $("#episodesList");
+const episodesListButton = ".btn btn-outline-light btn-sm Show-getEpisodes";
 const API_TV_MAZE_URL = `http://api.tvmaze.com/`;
+const NO_IMAGE_URL = `https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Red_X.svg/200px-Red_X.svg.png`;
 /** Given a search term, search for tv shows that match that query.
  *
  *  Returns (promise) array of show objects: [show, show, ...].
@@ -12,46 +15,24 @@ const API_TV_MAZE_URL = `http://api.tvmaze.com/`;
  */
 
 async function getShowsByTerm(term) {
-  // ADD: Remove placeholder & make request to TVMaze search shows API.
-  // return same format of data, just must be looped to ensure we are
-  // appending every relevant show to the search term.
-  console.log('shows by term ran');
-  const showResponse = await axios.get(
-    `${API_TV_MAZE_URL}search/shows`,
-    {params : {q : term}}
-  );
-  console.log('i got some shows', showResponse);
-
-  const showData = showResponse.data.map(show => {
-    return {
-    id: show.show.id,
-    name: show.show.name,
-    summary: show.show.summary,
-    image: show.show.image //NOTE: may not have image;
-
-    }
+  console.log("shows by term ran");
+  const showResponse = await axios.get(`${API_TV_MAZE_URL}search/shows`, {
+    params: { q: term },
   });
 
-  console.log(showData);
+  console.log("i got some shows", showResponse);
 
+  const showData = showResponse.data.map((show) => {
+    return {
+      id: show.show.id,
+      name: show.show.name,
+      summary: show.show.summary,
+      image: show.show.image ? show.show.image.medium : NO_IMAGE_URL, //NOTE: may not have image;
+    };
+  });
 
-  // return [
-  //   {
-  //     id: 1767,
-  //     name: "The Bletchley Circle",
-  //     summary: `<p><b>The Bletchley Circle</b> follows the journey of four ordinary
-  //          women with extraordinary skills that helped to end World War II.</p>
-  //        <p>Set in 1952, Susan, Millie, Lucy and Jean have returned to their
-  //          normal lives, modestly setting aside the part they played in
-  //          producing crucial intelligence, which helped the Allies to victory
-  //          and shortened the war. When Susan discovers a hidden code behind an
-  //          unsolved murder she is met by skepticism from the police. She
-  //          quickly realises she can only begin to crack the murders and bring
-  //          the culprit to justice with her former friends.</p>`,
-  //     image:
-  //       "http://static.tvmaze.com/uploads/images/medium_portrait/147/369403.jpg",
-  //   },
-  // ];
+  console.log("Data for shows", showData);
+  return showData;
 }
 
 /** Given list of shows, create markup for each and to DOM */
@@ -64,13 +45,13 @@ function populateShows(shows) {
       `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
            <img
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg"
-              alt="Bletchly Circle San Francisco"
+              src="${show.image}"
+              alt="${show.name}'s Image"
               class="w-25 me-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-light btn-sm Show-getEpisodes">
+             <button class="btn btn-outline-light btn-sm Show-getEpisodes" id=${show.id}>
                Episodes
              </button>
            </div>
@@ -86,6 +67,9 @@ function populateShows(shows) {
 /** Handle search form submission: get shows from API and display.
  *    Hide episodes area (that only gets shown if they ask for episodes)
  */
+
+// NOTE: Make sure we can search for new show after first search
+// without reloading the page
 
 async function searchForShowAndDisplay() {
   const term = $("#searchForm-term").val();
@@ -104,7 +88,13 @@ $searchForm.on("submit", async function (evt) {
  *      { id, name, season, number }
  */
 
-// async function getEpisodesOfShow(id) { }
+// $showsList.on("click", episodesListButton, function (evt) {
+//   console.log(evt.target.id);
+// });
+
+// async function getEpisodesOfShow(evt) {
+//   console.log(evt.target.id);
+// }
 
 /** Write a clear docstring for this function... */
 
