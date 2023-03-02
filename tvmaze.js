@@ -51,7 +51,9 @@ function populateShows(shows) {
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
              <div><small>${show.summary}</small></div>
-             <button class="btn btn-outline-light btn-sm Show-getEpisodes" id=${show.id}>
+             <button
+              class="btn btn-outline-light btn-sm Show-getEpisodes"
+              id=${show.id}>
                Episodes
              </button>
            </div>
@@ -80,6 +82,7 @@ async function searchForShowAndDisplay() {
 }
 
 $searchForm.on("submit", async function (evt) {
+
   evt.preventDefault();
   await searchForShowAndDisplay();
 });
@@ -88,14 +91,55 @@ $searchForm.on("submit", async function (evt) {
  *      { id, name, season, number }
  */
 
-// $showsList.on("click", episodesListButton, function (evt) {
-//   console.log(evt.target.id);
-// });
+async function getEpisodesOfShow(id) {
 
-// async function getEpisodesOfShow(evt) {
-//   console.log(evt.target.id);
-// }
+  const response = await axios.get(`${API_TV_MAZE_URL}shows/${id}/episodes`);
+  console.log(response);
 
-/** Write a clear docstring for this function... */
+  const episodesData = response.data.map((ep) => {
+    return {
+      id: ep.id,
+      name: ep.name,
+      season: ep.season,
+      number: ep.number
+    };
+  });
 
-// function populateEpisodes(episodes) { }
+  return episodesData;
+}
+
+/**
+ * Handles episodes click, gets episodes from API and shows in DOM
+ */
+
+async function searchForEpisodesAndDisplay(evt) {
+  const id = +$(evt.target).closest(".Show").data('show-id');
+
+  const episodes = await getEpisodesOfShow(id);
+
+  populateEpisodes(episodes);
+
+  $episodesArea.show();
+
+
+}
+/** Given list of episodes, create markup for each and
+ * add to DOM list
+*/
+
+function populateEpisodes(episodes) {
+  $episodesList.empty();
+
+  for (let ep of episodes) {
+    const $epInfo = $(
+      `<li>
+      ${ep.name}, season ${ep.season}, episode ${ep.number}
+      </li>`);
+    $episodesList.append($epInfo);
+  }
+}
+
+$showsList.on("click", ".Show-getEpisodes", searchForEpisodesAndDisplay);
+
+// .a, .b
+// .a.b
